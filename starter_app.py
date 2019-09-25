@@ -22,8 +22,11 @@ data = pd.read_csv('C:/Users/Ning/Insight material/Insight_College_Ranking_for_I
 institution = 'Samford University'
 intl_pct = data.intl_pct[data.INSTNM == institution].tolist()[0]/100
 diverse_ind = data.diverse_ind[data.INSTNM == institution].tolist()[0]
-
-
+# organize institution names for drop down menu. Still needs to order alphabetically
+data_dropdown = data[['INSTNM','UNITID']]
+data_dropdown = data_dropdown.rename(columns={'INSTNM': 'label', 'UNITID': 'value'})
+data_dropdown = data_dropdown.T.to_dict()
+data_dropdown = list(data_dropdown.values())
 
 app.layout = html.Div([
     html.H1(children='Universal University'),
@@ -31,6 +34,13 @@ app.layout = html.Div([
     html.Div(children='''
         Boosting your international student acquisition 
     '''),
+    
+    dcc.Dropdown(
+        id='my-dropdown',
+        options=data_dropdown,
+        value=data_dropdown[0]['value']),
+    
+    html.Div(id='output-container'),
              
     dcc.Graph(
         id='institution-graph',
