@@ -12,7 +12,6 @@ import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import statsmodels.api as sm
-# import os
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
@@ -21,12 +20,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # import data
-data = pd.read_csv('C:/Users/Ning/Insight material/Insight_College_Ranking_for_International_Students/Data/Data national universities 274.csv')
-#institution = 'Samford University'
-#intl_pct = data.intl_pct[data.INSTNM == institution].tolist()[0]/100
-#diverse_ind = data.diverse_ind[data.INSTNM == institution].tolist()[0]
-
-
+data = pd.read_csv('Data national universities 274.csv')
 
 # organize institution names for drop down menu. Still needs to order alphabetically
 data_dropdown = data[['INSTNM','UNITID']]
