@@ -8,3 +8,5 @@ National Center for Education Statistics: https://nces.ed.gov/ipeds/datacenter/D
 US News: https://www.usnews.com/best-colleges
 International Student: https://www.internationalstudent.com/international-financial-aid/
 
+I build the following linear regression to predict the logit transformation of the percent of international students.
+logit(% enrollment) = -2.86 + 0.32*Int_graduation_rate + 0.27*diversity_index + 0.17*avg_intl_financial_aid + 0.04*pct_intl_financial_aid
