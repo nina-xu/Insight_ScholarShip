@@ -26,6 +26,8 @@ data = pd.read_csv('data 258.csv')
 # convert integers to float so I don't have to see warnings anymore
 data.loc[:, 'TUITION2'] = data.TUITION2.astype('float64')
 data.loc[:, 'avg_award'] = data.avg_award.astype('float64')
+# import list of insitutions that benefit from increasing scholarship
+
 
 # organize institution names for drop down menu. Still needs to order alphabetically
 data_dropdown = data[['INSTNM','UNITID']]
@@ -36,7 +38,6 @@ features = ['GRNRALT_rate','TUITION2','diverse_ind','avg_award','pct_awarded']
 features_actionable = ['GRNRALT_rate','diverse_ind','avg_award','pct_awarded']
 feature_display_name = [
                         'Intl Graduation Rate',
-                        #'Tuition', 
                         'Racial Diversity',
                         'Average Intl Financial Aid',
                         'Percent Intl Financial Aid'
@@ -103,26 +104,15 @@ app.layout = html.Div([
                     ),
     
             html.Div(id='output-container'),
-            html.H2(children = 'Short-term recommendation:'),
+            html.H2(id='shortterm-header'),
             html.Div(id='shortterm-text'),
-            html.H2(children = 'Long-term recommendation:'),
+            html.H2(id = 'longterm-header'),
             #html.Div(dcc.Graph( id = 'longterm-graph')),
             html.Div(id='longterm-text'),
             ],
             style= {'width': '51%', 'display': 'inline-block',
                     'vertical-align': 'top'})            
 ])
-
-## show institution's stats, just the % of international student
-#@app.callback(
-#    dash.dependencies.Output('output-container', 'children'),
-#    [dash.dependencies.Input('my-dropdown', 'value')])
-#def update_snapshot(value):
-#    if value is not None:
-#        return 'Currently, your institution has {}% international students'.format(
-#                round(data[data.UNITID == value]['intl_pct'].values[0],1))
-
-
 
 # show institutions position on the distributions
 @app.callback(
@@ -140,20 +130,11 @@ def update_scatter(unitid):
         if i % 2 ==0:
             fig.update_yaxes(title_text='% Intl Students', row = int(i/2)+1, col = i%2+1)
     
-```    fig['layout'].update(height=500, width=600, title='Your Institution Performance',
+    fig['layout'].update(height=500, width=600, title='Your Institution Performance',
        showlegend = False)
 
     
     if unitid is not None:
-#        inst_value = data[data.UNITID==unitid][features] # all features used in the model
-#        best_feature_short = recommend.select_best_feature(
-#                    unitid, features_actionable[2:4], inst_value, data, result, scaler)
-#        recommendations_short = recommend.generate_recommendations(
-#                    best_feature_short, unitid, inst_value, data)
-#        best_feature_long = recommend.select_best_feature(
-#                    unitid, features_actionable[:2], inst_value, data, result, scaler)
-#        recommendations_long = recommend.generate_recommendations(
-#                    best_feature_long, unitid, inst_value, data)
         colors = {}
         opacity = {}
         sizes = {}
@@ -165,46 +146,40 @@ def update_scatter(unitid):
             fig['data'][j]['marker']['color'] = colors['trace'+str(j)]
             fig['data'][j]['marker']['opacity'] = opacity['trace'+str(j)]
             fig['data'][j]['marker']['size'] = sizes['trace'+str(j)]
-            #update hovering text into including recommendations
-#            if features_actionable[j] == best_feature_short[0]:
-#                fig['data'][j]['hovertext'] = recommendations_short
-#            if features_actionable[j] == best_feature_long[0]:
-#                fig['data'][j]['hovertext'] = recommendations_long
     return fig
 
 #show institution's action
 @app.callback(
-    #[
+    [dash.dependencies.Output('shortterm-header', 'children'),
      #dash.dependencies.Output('shortterm-graph', 'figure'),
-     dash.dependencies.Output('shortterm-text', 'children'),
+     dash.dependencies.Output('shortterm-text', 'children')],
     [dash.dependencies.Input('my-dropdown', 'value')])
 def short_term_recommendation(value):
     if value is not None:
-        inst_value = data[data.UNITID==value][features] # all features used in the model
-        best_feature = recommend.select_best_feature(
-                value, features_actionable[2:4], inst_value, data, result, scaler)
-        recommendations = recommend.generate_recommendations(
-                best_feature, value, inst_value, data)
-        #histogram = recommend.generate_recommendations(
-        #        best_feature, value, inst_value, data)
-        return recommendations 
+        inst_value = data[data.UNITID==value][features]
+        header, text = recommend.generate_recommendations_shortterm(
+                value, features_actionable[2:4], 
+                inst_value, data, result, scaler )
+        return header, text
+    else:
+        return None, None
     
     
 @app.callback(
-    #[
+    [dash.dependencies.Output('longterm-header', 'children'),
      #dash.dependencies.Output('longterm-graph', 'figure'),
-     dash.dependencies.Output('longterm-text', 'children'),
+     dash.dependencies.Output('longterm-text', 'children')],
     [dash.dependencies.Input('my-dropdown', 'value')])
 def longterm_recommendation(value):
     if value is not None:
         inst_value = data[data.UNITID==value][features] # all features used in the model
         best_feature = recommend.select_best_feature(
                 value, features_actionable[:2], inst_value, data, result, scaler)
-        recommendations = recommend.generate_recommendations(
+        header, recommendations = recommend.generate_recommendations_longterm(
                 best_feature, value, inst_value, data)
-        #histogram = recommend.generate_recommendations(
-        #        best_feature, value, inst_value, data)
-        return recommendations
+        return header, recommendations
+    else:
+        return None, None
 
 if __name__ == '__main__':
     app.run_server(debug=True)
