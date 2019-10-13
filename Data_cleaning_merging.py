@@ -196,5 +196,13 @@ scholarship.loc[:, "link_cleaned"] = url2_cleaned
 data = pd.merge(
     data, scholarship, how="left", left_on="WEBADDR_cleaned", right_on="link_cleaned"
 )
+#%% remove outliers
+data289 = data.dropna(subset = ['link'])
+# remove outlier
+data289 = data289[data289.intl_pct<80]
+# remove % awarded that are > 1
+data258 = data289[data289.pct_awarded<1]
+
 #%%
-data.to_csv("Data/Data Merged.csv", index=False)
+data.to_csv("Data/Data merged.csv", index=False)
+data258.to_csv("Data/data 258.csv", index=False)
